@@ -1,0 +1,13 @@
+generator_id,material_type,quantity_kg,quality_grade,available_from,available_until,description,is_synthetic
+1,WET_ORGANIC,350,A,2026-11-05,2026-11-12,Kitchen and garden waste from 420 flats source-separated at bin level,True
+2,WET_ORGANIC,600,B,2026-11-06,2026-11-13,Wet organic waste with minor paper contamination from 780-unit complex,True
+3,DRY_PAPER,200,A,2026-11-07,2026-11-14,Cardboard and office paper collected from recycling bins,True
+4,WET_ORGANIC,1200,A,2026-11-05,2026-11-10,Food court and cafeteria organic waste across campus,True
+5,DRY_PAPER,800,A,2026-11-08,2026-11-15,Shredded office paper and cardboard from 14-building campus,True
+5,DRY_PLASTIC,400,B,2026-11-08,2026-11-15,PET bottles and packaging film with label contamination,True
+6,DRY_PAPER,500,B,2026-11-06,2026-11-13,Mixed office paper partially sorted,True
+7,DRY_PLASTIC,600,A,2026-11-07,2026-11-14,Clean PET and HDPE from retail collection points,True
+7,DRY_METAL,300,A,2026-11-07,2026-11-14,Aluminium cans and steel scrap from food court,True
+8,DRY_METAL,450,B,2026-11-05,2026-11-12,Mixed metal scrap from store fit-outs and maintenance,True
+9,E_WASTE,80,A,2026-11-10,2026-11-17,End-of-life medical equipment and IT assets (non-hazardous),True
+10,WET_ORGANIC,250,A,2026-11-06,2026-11-13,Restaurant and kitchen organic waste daily aggregation,True

@@ -1,0 +1,59 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment variables — NEVER commit real credentials
+.env
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local AI coding assistant state
+.bob/
+.claude/
+
+# Local credentials and configuration
+.credentials
+credentials.yaml
+*.pem
+*.key
+
+# Local test outputs
+smoke_test_result.json
+
+# Logs
+*.log
+
+# IBM Bob desktop application (not project source)
+IBM Bob/
+
+# Temporary Orchestrate smoke tests
+scripts/smoke_test_agent.py
+scripts/smoke_test_agent_v2.py
+smoke_test_full_response.json

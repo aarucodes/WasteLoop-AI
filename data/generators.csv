@@ -1,0 +1,11 @@
+id,name,type,address,pincode,lat,lng,contact_email,is_synthetic
+1,Prestige Shantiniketan Apartments,APARTMENT,"Whitefield Main Road, Whitefield, Bengaluru",560066,12.9698,77.7499,facilities@prestigeshantiniketan.example,True
+2,Sobha Dream Acres,APARTMENT,"Panathur Road, Marathahalli, Bengaluru",560087,12.9540,77.7014,rwa@sobhadreamacres.example,True
+3,Purva Panorama,APARTMENT,"Bannerghatta Road, JP Nagar, Bengaluru",560076,12.8975,77.5981,admin@purvasuites.example,True
+4,Manyata Tech Park,IT_PARK,"Nagawara, Hebbal, Bengaluru",560045,13.0469,77.6161,facilities@manyatatech.example,True
+5,Embassy Tech Village,IT_PARK,"Outer Ring Road, Devarabeesanahalli, Bengaluru",560103,12.9361,77.6962,admin@embassytechvillage.example,True
+6,Bagmane Tech Park,IT_PARK,"C V Raman Nagar, Bengaluru",560093,12.9859,77.6637,facilities@bagmanetech.example,True
+7,Phoenix Marketcity,COMMERCIAL,"Whitefield Road, Mahadevapura, Bengaluru",560048,12.9960,77.6962,waste@phoenixmarketcity.example,True
+8,Orion Mall,COMMERCIAL,"Dr Rajkumar Road, Rajajinagar, Bengaluru",560010,13.0025,77.5521,admin@orionmall.example,True
+9,Manipal Hospital,HOSPITAL,"Airport Road, Bengaluru",560017,12.9972,77.6429,biomedwaste@manipal.example,True
+10,Taj West End Hotel,HOTEL,"Race Course Road, Bengaluru",560001,12.9835,77.5748,sustainability@tajwestend.example,True

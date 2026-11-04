@@ -1,0 +1,11 @@
+id,name,processor_type,address,pincode,lat,lng,contact_email,licence_number,is_synthetic
+1,GreenBio Bengaluru,BIOGAS_PLANT,"Peenya Industrial Area, Bengaluru",560058,13.0289,77.5192,ops@greenbio.example,KSPCB-BIO-2021-001,True
+2,Bengaluru Biogas Works,BIOGAS_PLANT,"Neelamangala Industrial Area, Bengaluru",562123,13.0982,77.3912,contact@blrbiogas.example,KSPCB-BIO-2020-007,True
+3,EcoCompost Yelahanka,COMPOST_FACILITY,"Yelahanka New Town, Bengaluru",560064,13.0998,77.5963,info@ecocompost.example,KSPCB-COM-2022-003,True
+4,PaperFirst Recyclers,PAPER_RECYCLER,"Bommasandra Industrial Area, Bengaluru",560099,12.8253,77.6981,ops@paperfirst.example,KSPCB-PAP-2019-011,True
+5,CleanSheet Paper,PAPER_RECYCLER,"Dobbaspet Road, Nelamangala, Bengaluru",562123,13.1019,77.3762,recycling@cleansheet.example,KSPCB-PAP-2021-005,True
+6,PlastiLoop Recyclers,PLASTIC_RECYCLER,"Whitefield Industrial Area, Bengaluru",560066,12.9826,77.7396,info@plastiloop.example,KSPCB-PLA-2020-009,True
+7,GreenMetal Scrap,METAL_RECYCLER,"Peenya 2nd Stage, Bengaluru",560058,13.0254,77.5098,scrap@greenmetal.example,KSPCB-MET-2018-002,True
+8,E-Cycle Hub,E_WASTE_HANDLER,"Electronic City Phase 2, Bengaluru",560100,12.8394,77.6681,ewaste@ecyclehub.example,KSPCB-EWS-2022-014,True
+9,GlassBack Recyclers,GLASS_RECYCLER,"Bommanahalli, Bengaluru",560068,12.9026,77.6273,glass@glassback.example,KSPCB-GLA-2023-001,True
+10,Hasiru Dala Innovations,COMPOST_FACILITY,"Kengeri, Bengaluru",560060,12.9073,77.4887,info@hasirudala.example,KSPCB-COM-2019-006,True
