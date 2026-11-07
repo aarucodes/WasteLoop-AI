@@ -163,10 +163,27 @@ This avoids relying on an LLM to make final operational decisions.
 The Streamlit application in `app/streamlit_app.py` is organised into five main areas:
 
 - **Overview:** Dashboard with generator, processor, listing, and pickup statistics.
-- **Post Waste:** Create and manage waste listings.
+- 
+  ![wasteloop_ai_streamlit](images/Picture1.png)
+
+- **Post Waste:** Create, manage and find waste listings.
+
+  ![wasteloop_ai_streamlit](images/Picture7.png)
+  
+  ![wasteloop_ai_streamlit](images/Picture3.png)
+  
 - **Find Matches:** Request and review processor recommendations.
+
+  ![wasteloop_ai_streamlit](images/Picture5.png)
+
 - **Pickup Approvals:** Propose, approve, and track pickup status.
+
+  ![wasteloop_ai_streamlit](images/Picture6.png)
+
 - **Directory:** Browse generator and processor records.
+  
+  ![wasteloop_ai_streamlit](images/Picture4.png)
+
 
 The application uses synthetic demonstration records. These are explicitly identified as synthetic rather than presented as verified real-world registrations.
 
