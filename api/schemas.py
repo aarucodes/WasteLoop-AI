@@ -34,6 +34,7 @@ class _Base(BaseModel):
 # ── Generator ─────────────────────────────────────────────────────────────────
 
 class GeneratorCreate(BaseModel):
+    model_config = {"extra": "forbid"}
     name:          str          = Field(..., min_length=2, max_length=200)
     type:          GeneratorType
     address:       str          = Field(..., min_length=5)
@@ -60,6 +61,7 @@ class Generator(_Base):
 # ── WasteListing ──────────────────────────────────────────────────────────────
 
 class WasteListingCreate(BaseModel):
+    model_config = {"extra": "forbid"}
     generator_id:    int
     material_type:   MaterialType
     quantity_kg:     float        = Field(..., gt=0)
@@ -79,6 +81,7 @@ class WasteListingCreate(BaseModel):
 
 
 class WasteListingUpdate(BaseModel):
+    model_config = {"extra": "forbid"}
     status: ListingStatus
 
 
@@ -99,6 +102,7 @@ class WasteListing(_Base):
 # ── Processor ─────────────────────────────────────────────────────────────────
 
 class ProcessorCreate(BaseModel):
+    model_config = {"extra": "forbid"}
     name:           str          = Field(..., min_length=2, max_length=200)
     processor_type: ProcessorType
     address:        str          = Field(..., min_length=5)
@@ -127,6 +131,7 @@ class Processor(_Base):
 # ── ProcessorCapacity ─────────────────────────────────────────────────────────
 
 class ProcessorCapacityCreate(BaseModel):
+    model_config = {"extra": "forbid"}
     processor_id:    int
     material_type:   MaterialType
     min_quantity_kg: float = Field(..., ge=0)
@@ -188,6 +193,7 @@ class MatchResponse(BaseModel):
 # ── Pickup ────────────────────────────────────────────────────────────────────
 
 class PickupCreate(BaseModel):
+    model_config = {"extra": "forbid"}
     listing_id:    int
     processor_id:  int
     proposed_date: date
@@ -196,6 +202,7 @@ class PickupCreate(BaseModel):
 
 
 class PickupStatusUpdate(BaseModel):
+    model_config = {"extra": "forbid"}
     status:      PickupStatus
     approved_by: Optional[str] = None
     notes:       Optional[str] = None
@@ -218,6 +225,7 @@ class Pickup(_Base):
 # ── Agent ─────────────────────────────────────────────────────────────────────
 
 class AgentRunRequest(BaseModel):
+    model_config = {"extra": "forbid"}
     listing_id:   int
     user_message: Optional[str] = "Find the best processors for this waste listing."
 

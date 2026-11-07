@@ -1,4 +1,4 @@
-﻿"""
+"""
 scripts/seed_db.py
 ------------------
 Loads synthetic demonstration data from data/*.csv into the database.
@@ -27,6 +27,8 @@ from api.database import SessionLocal, init_db
 from api.models import (
     Generator,
     GeneratorType,
+    Match,
+    Pickup,
     MaterialType,
     Processor,
     ProcessorCapacity,
@@ -142,11 +144,23 @@ def seed_waste_listings(db: Session, generator_id_map: dict) -> None:
 def clear_synthetic_data(db: Session) -> None:
     """Remove all rows flagged is_synthetic=True (safe for --force re-seed).
 
-    ProcessorCapacity rows do not have is_synthetic; they are deleted implicitly
-    when the parent Processor rows are removed via the ORM cascade, but SQLite
-    does not enforce FK cascades automatically, so we delete them explicitly first.
+    ProcessorCapacity, Match and Pickup rows do not carry is_synthetic, so they
+    are removed by tracing them to synthetic parent listings/processors first.
     """
-    # Delete dependent rows that have no is_synthetic flag
+    # Remove dependent workflow rows first; they do not carry is_synthetic.
+    synthetic_listing_ids = db.query(WasteListing.id).filter(WasteListing.is_synthetic == True)
+    synthetic_processor_ids = db.query(Processor.id).filter(Processor.is_synthetic == True)
+    pickup_deleted = db.query(Pickup).filter(
+        (Pickup.listing_id.in_(synthetic_listing_ids)) |
+        (Pickup.processor_id.in_(synthetic_processor_ids))
+    ).delete(synchronize_session="fetch")
+    match_deleted = db.query(Match).filter(
+        (Match.listing_id.in_(synthetic_listing_ids)) |
+        (Match.processor_id.in_(synthetic_processor_ids))
+    ).delete(synchronize_session="fetch")
+    print(f"  [DEL] Cleared {pickup_deleted} synthetic pickups and {match_deleted} synthetic matches")
+
+    # Delete dependent capacity rows before processors.
     cap_deleted = (
         db.query(ProcessorCapacity)
         .filter(
