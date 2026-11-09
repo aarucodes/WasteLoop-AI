@@ -163,27 +163,24 @@ This avoids relying on an LLM to make final operational decisions.
 The Streamlit application in `app/streamlit_app.py` is organised into five main areas:
 
 - **Overview:** Dashboard with generator, processor, listing, and pickup statistics.
-- 
-  ![wasteloop_ai_streamlit](images/Picture1.png)
-
-- **Post Waste:** Create, manage and find waste listings.
-
-  ![wasteloop_ai_streamlit](images/Picture7.png)
-  
-  ![wasteloop_ai_streamlit](images/Picture3.png)
-  
-- **Find Matches:** Request and review processor recommendations.
-
-  ![wasteloop_ai_streamlit](images/Picture5.png)
-
-- **Pickup Approvals:** Propose, approve, and track pickup status.
-
-  ![wasteloop_ai_streamlit](images/Picture6.png)
-
+- **Post Waste:** Create and manage waste listings. Users can select an existing generator or register a new generator directly in the workflow before submitting a listing.
+- **Find Matches:** Request and review processor recommendations, including scores, distances, and explanations.
+- **Pickup Approvals:** Propose pickups, explicitly approve them, and track their status.
 - **Directory:** Browse generator and processor records.
-  
-  ![wasteloop_ai_streamlit](images/Picture4.png)
 
+Application screenshots:
+
+![WasteLoop AI overview](images/Picture1.png)
+
+![Waste listing workflow](images/Picture7.png)
+
+![Generator registration workflow](images/Picture3.png)
+
+![WasteLoop AI matching](images/Picture5.png)
+
+![Pickup approvals](images/Picture6.png)
+
+![Generator and processor directory](images/Picture4.png)
 
 The application uses synthetic demonstration records. These are explicitly identified as synthetic rather than presented as verified real-world registrations.
 
@@ -195,12 +192,11 @@ WasteLoop AI has been tested as a working end-to-end prototype.
 
 A successful live IBM watsonx Orchestrate invocation was verified through the Streamlit interface.
 
-In the recorded test:
+Live IBM watsonx Orchestrate integration was successfully tested through the Streamlit application with mock mode disabled. In the recorded test:
 - Four candidate processors were evaluated.
-- Three eligible recommendations were displayed.
+- Three eligible recommendations were returned.
 - Each recommendation included a score and distance.
-- The backend independently recomputed the matching results.
-- **Live IBM watsonx Orchestrate integration was successfully tested through the Streamlit application with mock mode disabled.** Four candidate processors were evaluated, and three eligible recommendations were returned. The backend independently recomputed and validated the results.
+- The backend independently recomputed and validated the results.
 
 ### Pickup lifecycle
 
@@ -216,32 +212,24 @@ The completed pickup was also verified through the backend API.
 
 ### Automated tests
 
-<badge color="success">62 tests passed</badge>
+<badge color="success">72 tests passed</badge>
 
 | Test file | Tests passed |
 |---|---:|
 | `tests/test_matching.py` | 37 |
 | `tests/test_matching_drift.py` | 20 |
-| `tests/test_api.py` | 5 |
-| **Total** | **62** |
+| `tests/test_api.py` | 15 |
+| **Total** | **72** |
 
 The tests cover matching eligibility, scoring, consistency between matching implementations, API behaviour, and pickup workflow rules.
 
-## 9. Prototype Impact
+## 9. Prototype Impact and Measurement
 
-WasteLoop AI aims to reduce the time and effort required for bulk waste generators to identify suitable processors.
+The prototype demonstrates a structured workflow for discovering suitable processors and coordinating a human-approved pickup.
 
-To evaluate this, compare manual processor discovery with the application-assisted matching workflow.
+In the recorded live-agent demonstration, the system evaluated four candidate processors and returned three eligible recommendations. The automated test suite has 72 passing tests, and the pickup lifecycle was manually verified through completion.
 
-| Measurement | Time |
-|---|---:|
-| Manual processor search | **[INSERT MEASURED TIME]** |
-| WasteLoop AI matching workflow | **[INSERT MEASURED TIME]** |
-| Time saved | **[CALCULATE AFTER MEASUREMENT]** |
-
-**Measurement context:** This is intended to be a controlled prototype measurement using the same waste listing and synthetic processor dataset for both approaches. It is not a claim of real-world deployment impact.
-
-The prototype also demonstrates a complete human-supervised pickup workflow, from matching through completion.
+The prototype has **not** yet measured time saved against a manual search baseline, verified recovered waste tonnage, or quantified carbon savings. Those outcomes require controlled measurements and real-world operational data; no such impact is claimed at this stage.
 
 ## 10. Running the Project
 
@@ -353,75 +341,97 @@ All phases below are planned enhancements. They are not represented as implement
 - Provide personalised waste-reduction and segregation suggestions.
 - Explore price discovery between generators and processors.
 
-## 13. IBM Bob — Development Contributions
+## 13. How IBM Bob Helped Build This Project
 
-IBM Bob was a major development collaborator throughout the creation of WasteLoop AI. It was used for architecture design, implementation, code generation, debugging, test development, integration support, and documentation.
+IBM Bob was used as an AI development collaborator throughout the creation of WasteLoop AI. Its contribution extended across architecture, code generation, implementation, debugging, test development, integration support, and documentation—not just isolated code suggestions.
 
-Rather than using Bob only for isolated code suggestions, the project involved using it across multiple stages of the software development lifecycle.
+The following describes Bob's contributions in relation to the project files and the development work completed.
+
+> Bob assisted with design, code generation, and debugging. Generated code and recommendations were reviewed, adapted, integrated, and tested by the project author. Platform setup, agent registration, live invocation, and end-to-end validation were also carried out by the project author.
 
 ### Architecture and system design
 
-Bob assisted in designing the overall application architecture, including:
+Bob helped design and document the core architectural decisions:
 
-- The Streamlit and FastAPI application structure.
-- The separation between AI orchestration and deterministic matching.
-- The human-approval boundary for pickup operations.
-- The data flow between the Orchestrate agent, matching tool, backend, and database.
+- **Two-layer matching architecture:** The authoritative matching logic lives in `matching/engine.py` as a pure Python module. An inline implementation is embedded in `tools/find_waste_matches.py` for the Orchestrate tool. The `tests/test_matching_drift.py` suite enforces parity between the implementations.
+- **Human-in-the-loop pickup boundary:** The agent returns recommendations; it does not approve or create pickups. Pickup creation and approval are separate backend operations.
+- **Flat-scalar tool inputs:** Bob recommended scalar inputs for the Orchestrate tool signature to avoid nested-object serialization issues.
+- **Application flow:** Bob assisted with the Streamlit and FastAPI structure and the data flow between the agent, matching tool, backend, and database.
 
-### Backend and database development
+### Data models, schemas, and database
 
-Bob assisted with the implementation of the backend and data layer, including:
+Bob generated and refined initial implementations of:
 
-- `api/models.py` — SQLAlchemy data models and application enumerations.
-- `api/schemas.py` — Pydantic request and response schemas.
-- `api/database.py` — database engine, session management, and initialisation.
-- `api/main.py` — FastAPI application and API functionality.
+- `api/models.py` — SQLAlchemy models for generators, waste listings, processors, processor capacities, matches, and pickups, including application enums and synthetic-data flags.
+- `api/schemas.py` — Pydantic request and response schemas with validation.
+- `api/database.py` — database engine configuration, session management, and database initialization.
 
-### Matching engine development
+### Backend API
 
-Bob played a major role in developing `matching/engine.py`, including the deterministic eligibility and ranking architecture.
+Bob assisted with the FastAPI implementation in `api/main.py`, including endpoints for:
 
-This involved:
-- Material and quality compatibility.
-- Quantity and capacity checks.
-- Geographic distance calculations.
-- Availability overlap.
-- Weighted scoring and match explanations.
-- Structured matching inputs and outputs.
+- `GET /health`
+- `GET /dashboard/summary`
+- `GET /generators` and `POST /generators`
+- `GET /processors` and `POST /processors`
+- `GET /processor-capacities` and `POST /processor-capacities`
+- `GET /waste-listings` and `POST /waste-listings`
+- `GET /matching/{listing_id}`
+- `POST /agent/match`
+- `GET /pickups` and `POST /pickups`
+- `PATCH /pickups/{pickup_id}/status`
+
+Bob also helped develop shared conversion and validation logic and the pickup state-transition rules. The project author reviewed and integrated the backend changes and tested the API behaviour.
+
+### Matching engine
+
+Bob played a major role in developing `matching/engine.py`, including:
+
+- `haversine_km` — great-circle distance between latitude/longitude points.
+- Dimension scorers for material, quality, quantity, distance, and availability.
+- `is_eligible` — hard eligibility checks with machine-readable rejection reasons.
+- `build_explanation` — deterministic plain-English match explanations.
+- Dataclasses such as `ListingInput`, `CapacityInput`, `ProcessorInput`, `ScoreBreakdown`, and `MatchResult`.
+- `score_processor_for_listing` and `find_matches` — processor scoring, ranking, tie-breaking, and top-result selection.
 
 ### IBM watsonx Orchestrate integration
 
-Bob assisted with the development and configuration of:
+Bob generated initial versions of, and assisted with the configuration of:
 
-- `agents/wasteloop_agent.yaml` — agent definition, instructions, and tool configuration.
-- `tools/find_waste_matches.py` — the matching tool exposed to the Orchestrate agent.
-- Structured tool inputs and outputs.
-- Read-only tool permissions.
-- Integration and debugging of the live agent workflow.
+- `tools/find_waste_matches.py` — the `@tool`-decorated tool with `ToolPermission.READ_ONLY`, an embedded synthetic processor snapshot, and matching logic kept in sync with the backend engine.
+- `agents/wasteloop_agent.yaml` — the `wasteloop_agent` definition, instructions, tool configuration, and starter prompts.
+
+The tool uses flat scalar inputs and returns ranked recommendations, score details, explanations, and a snapshot identifier. The agent is restricted to matching and recommendations; pickup operations remain under backend and human control.
+
+The project author registered the agent and tool in IBM watsonx Orchestrate and verified the live end-to-end invocation through the Streamlit application with mock mode disabled.
 
 ### Frontend development
 
-Bob assisted with the implementation and refinement of `app/streamlit_app.py`, including the dashboard, waste listing workflow, matching interface, pickup approval interface, and directory views.
+Bob generated and refined the Streamlit interface in `app/streamlit_app.py`, covering the overview dashboard, waste listing, matching, pickup approvals, and directory views.
+
+Bob also assisted with the newer frontend structure:
+- `app/common.py` — shared application utilities.
+- `app/pages/` — separate Streamlit pages for generator and processor workflows.
+
+The Post Waste workflow was extended to let a user register a new generator through the existing generator API and then select that generator for the waste listing.
 
 ### Testing and debugging
 
-Bob also contributed to test development and debugging, including:
+Bob generated initial versions of the test suites and assisted with debugging and test refinement:
 
-- `tests/test_matching.py`
-- `tests/test_matching_drift.py`
-- `tests/test_api.py`
+- `tests/test_matching.py` — matching scorers, eligibility filters, composite scoring, ranking, tie-breaking, and end-to-end matching.
+- `tests/test_matching_drift.py` — parity between the backend matching engine and the Orchestrate tool implementation.
+- `tests/test_api.py` — API endpoints, generator creation and validation, matching, and pickup workflow rules.
 
-The matching drift tests help ensure that the agent-side matching implementation and backend matching engine remain consistent.
+The current automated test run completed with **72 passing tests**: 37 matching tests, 20 matching-drift tests, and 15 API tests. The project author reviewed and supplemented the tests during integration.
 
-Bob was also used to investigate integration issues, diagnose errors, refine implementation details, and improve the overall reliability of the prototype.
+### Documentation and demo data
 
-### Documentation and project structure
-
-Bob assisted in generating and refining the project documentation, repository structure, synthetic seed data, and setup instructions.
+Bob assisted in drafting and refining the README, repository documentation, setup guidance, and synthetic demonstration data. The project author reviewed the final descriptions and added limitations to distinguish prototype functionality from verified real-world outcomes.
 
 ### Human review and validation
 
-Bob's generated code and recommendations were reviewed, adapted, integrated, and tested as part of the development process. The final implementation was validated through automated tests, live Orchestrate invocation, backend checks, and manual testing of the pickup lifecycle.
+Bob's generated code and recommendations were reviewed, adapted, integrated, and tested. The project author handled the IBM watsonx Orchestrate platform setup and registration, verified the live agent invocation, ran the automated test suite, and manually tested the pickup lifecycle through completion.
 
 **WasteLoop AI demonstrates how IBM Bob can contribute beyond code completion: from system architecture and implementation to integration, debugging, testing, and documentation of a working AI-assisted application.**
 
@@ -442,13 +452,11 @@ WasteLoop-AI/
 │   └── schemas.py
 │
 ├── app/
+│   ├── common.py
+│   ├── pages/
+│   │   ├── 1 apartments
+│   │   └── 2 processor
 │   └── streamlit_app.py
-│
-├── data/
-│   ├── generators.csv
-│   ├── processors.csv
-│   ├── processor_capacity.csv
-│   └── waste_listings.csv
 │
 ├── matching/
 │   └── engine.py
