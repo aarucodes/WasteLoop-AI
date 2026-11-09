@@ -124,3 +124,121 @@ def test_agent_mock_never_creates_a_pickup(client, monkeypatch):
     assert body["requires_approval"] is True
     assert body["proposed_pickup"] is None
     assert client.get("/pickups").json() == []
+
+
+# ── Generator creation (POST /generators) ─────────────────────────────────────
+
+VALID_GENERATOR = {
+    "name": "Sunrise Apartments",
+    "type": "APARTMENT",
+    "address": "Whitefield Main Road, Bengaluru",
+    "pincode": "560066",
+    "lat": 12.9716,
+    "lng": 77.7499,
+    "contact_email": "rwa@sunriseapts.test",
+    "is_synthetic": False,
+}
+
+
+def test_create_generator_returns_201_with_id(client):
+    resp = client.post("/generators", json=VALID_GENERATOR)
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["id"] > 0
+    assert body["name"] == "Sunrise Apartments"
+    assert body["type"] == "APARTMENT"
+    assert body["pincode"] == "560066"
+    assert body["is_synthetic"] is False
+
+
+def test_created_generator_appears_in_list(client):
+    client.post("/generators", json=VALID_GENERATOR)
+    resp = client.get("/generators")
+    assert resp.status_code == 200
+    names = [g["name"] for g in resp.json()]
+    assert "Sunrise Apartments" in names
+
+
+def test_create_generator_all_types_accepted(client):
+    """Every GeneratorType value must be accepted by POST /generators."""
+    for gtype in ("APARTMENT", "IT_PARK", "COMMERCIAL", "HOSPITAL", "HOTEL"):
+        payload = {**VALID_GENERATOR, "name": f"Gen {gtype}", "type": gtype,
+                   "contact_email": f"{gtype.lower()}@test.test"}
+        resp = client.post("/generators", json=payload)
+        assert resp.status_code == 201, f"Failed for type={gtype}: {resp.text}"
+        assert resp.json()["type"] == gtype
+
+
+def test_create_generator_invalid_pincode_rejected(client):
+    bad = {**VALID_GENERATOR, "pincode": "12345"}   # only 5 digits
+    resp = client.post("/generators", json=bad)
+    assert resp.status_code == 422
+
+    bad2 = {**VALID_GENERATOR, "pincode": "ABCDEF"}  # non-numeric
+    resp2 = client.post("/generators", json=bad2)
+    assert resp2.status_code == 422
+
+
+def test_create_generator_name_too_short_rejected(client):
+    bad = {**VALID_GENERATOR, "name": "X"}  # min_length=2
+    resp = client.post("/generators", json=bad)
+    assert resp.status_code == 422
+
+
+def test_create_generator_address_too_short_rejected(client):
+    bad = {**VALID_GENERATOR, "address": "A"}  # min_length=5
+    resp = client.post("/generators", json=bad)
+    assert resp.status_code == 422
+
+
+def test_create_generator_extra_fields_rejected(client):
+    """GeneratorCreate uses extra='forbid'."""
+    bad = {**VALID_GENERATOR, "unknown_field": "oops"}
+    resp = client.post("/generators", json=bad)
+    assert resp.status_code == 422
+
+
+def test_create_generator_missing_required_field_rejected(client):
+    for field in ("name", "type", "address", "pincode", "lat", "lng", "contact_email"):
+        payload = {k: v for k, v in VALID_GENERATOR.items() if k != field}
+        resp = client.post("/generators", json=payload)
+        assert resp.status_code == 422, f"Expected 422 when '{field}' is missing"
+
+
+def test_new_generator_id_used_for_waste_listing(client):
+    """
+    End-to-end: create a generator via POST /generators, then use its returned
+    ID (not a hardcoded value) to create a waste listing.
+    """
+    gen_resp = client.post("/generators", json=VALID_GENERATOR)
+    assert gen_resp.status_code == 201
+    new_gen_id = gen_resp.json()["id"]
+
+    today = date.today()
+    listing_resp = client.post("/waste-listings", json={
+        "generator_id": new_gen_id,
+        "material_type": "WET_ORGANIC",
+        "quantity_kg": 250.0,
+        "quality_grade": "A",
+        "available_from": today.isoformat(),
+        "available_until": (today + timedelta(days=7)).isoformat(),
+        "is_synthetic": False,
+    })
+    assert listing_resp.status_code == 201
+    body = listing_resp.json()
+    assert body["generator_id"] == new_gen_id
+    assert body["status"] == "OPEN"
+
+
+def test_waste_listing_with_unknown_generator_rejected(client):
+    today = date.today()
+    resp = client.post("/waste-listings", json={
+        "generator_id": 99999,
+        "material_type": "DRY_PAPER",
+        "quantity_kg": 100.0,
+        "quality_grade": "B",
+        "available_from": today.isoformat(),
+        "available_until": (today + timedelta(days=5)).isoformat(),
+        "is_synthetic": False,
+    })
+    assert resp.status_code == 404

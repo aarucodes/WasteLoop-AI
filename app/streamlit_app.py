@@ -92,12 +92,94 @@ with tab_overview:
 
 with tab_list:
     st.subheader("Create a waste listing")
-    if not generators:
-        st.warning("No generators are registered yet.")
+
+    GENERATOR_TYPES = ["APARTMENT", "IT_PARK", "COMMERCIAL", "HOSPITAL", "HOTEL"]
+
+    # ── Step 1: choose or create a generator ──────────────────────────────────
+    gen_options_raw = {f"{g['name']} · #{g['id']}": g["id"] for g in generators}
+    NEW_OPTION = "+ Add New Generator"
+    gen_choices = [NEW_OPTION] + list(gen_options_raw)
+
+    # Restore newly created generator selection across reruns
+    default_gen_index = 0
+    if st.session_state.get("new_generator_label") in gen_choices:
+        default_gen_index = gen_choices.index(st.session_state["new_generator_label"])
+
+    gen_label = st.selectbox(
+        "Generator",
+        gen_choices,
+        index=default_gen_index,
+        key="gen_selector",
+        help="Select an existing generator or register a new one.",
+    )
+
+    # ── New generator registration form ───────────────────────────────────────
+    if gen_label == NEW_OPTION:
+        st.info("Fill in the details below to register a new generator, then continue to create the listing.")
+        with st.form("register_generator"):
+            st.markdown("**Register new generator**")
+            new_name = st.text_input("Organisation name", max_chars=200,
+                                     help="Minimum 2 characters, maximum 200.")
+            new_type = st.selectbox("Generator type", GENERATOR_TYPES)
+            new_address = st.text_input("Address", help="Minimum 5 characters.")
+            new_pincode = st.text_input("Pincode", max_chars=6,
+                                        help="6-digit Bengaluru area pincode.")
+            gc1, gc2 = st.columns(2)
+            new_lat = gc1.number_input("Latitude", min_value=-90.0, max_value=90.0,
+                                       value=12.97, format="%.6f",
+                                       help="Decimal degrees, e.g. 12.9716")
+            new_lng = gc2.number_input("Longitude", min_value=-180.0, max_value=180.0,
+                                       value=77.59, format="%.6f",
+                                       help="Decimal degrees, e.g. 77.5946")
+            new_email = st.text_input("Contact email")
+            reg_submitted = st.form_submit_button("Register generator", type="primary")
+
+        if reg_submitted:
+            # Client-side pre-validation mirrors GeneratorCreate rules so the
+            # user gets clear feedback before hitting the API.
+            errors = []
+            if len(new_name.strip()) < 2:
+                errors.append("Organisation name must be at least 2 characters.")
+            if len(new_address.strip()) < 5:
+                errors.append("Address must be at least 5 characters.")
+            import re
+            if not re.fullmatch(r"\d{6}", new_pincode.strip()):
+                errors.append("Pincode must be exactly 6 digits.")
+            if not new_email.strip():
+                errors.append("Contact email is required.")
+            if errors:
+                for e in errors:
+                    st.error(e)
+            else:
+                created = api("POST", "/generators", json={
+                    "name": new_name.strip(),
+                    "type": new_type,
+                    "address": new_address.strip(),
+                    "pincode": new_pincode.strip(),
+                    "lat": new_lat,
+                    "lng": new_lng,
+                    "contact_email": new_email.strip(),
+                    "is_synthetic": False,
+                })
+                if created:
+                    label = f"{created['name']} · #{created['id']}"
+                    st.session_state["new_generator_label"] = label
+                    st.success(
+                        f"Generator **{created['name']}** registered (ID #{created['id']}). "
+                        "Now fill in the waste listing details below."
+                    )
+                    st.rerun()
+
+    # ── Step 2: waste listing form ─────────────────────────────────────────────
+    # Resolve the selected generator ID (None when "+ Add New Generator" is still chosen)
+    selected_gen_id = gen_options_raw.get(gen_label)
+
+    if selected_gen_id is None:
+        st.caption("Register or select a generator above to unlock the waste listing form.")
     else:
+        st.divider()
         with st.form("new_listing"):
-            gen_options = {f"{g['name']} · #{g['id']}": g["id"] for g in generators}
-            gen_label = st.selectbox("Generator", list(gen_options))
+            st.markdown(f"**Listing for:** {gen_label}")
             c1, c2, c3 = st.columns(3)
             material = c1.selectbox("Material", MATERIALS)
             qty = c2.number_input("Quantity (kg)", min_value=1.0, value=350.0, step=25.0)
@@ -107,15 +189,26 @@ with tab_list:
             end = c5.date_input("Available until", value=date.today() + timedelta(days=7))
             description = st.text_area("Description / contamination notes", max_chars=1000)
             submitted = st.form_submit_button("Create listing", type="primary")
+
         if submitted:
-            if end < start: st.error("End date must be on or after start date.")
+            if end < start:
+                st.error("End date must be on or after start date.")
             else:
                 result = api("POST", "/waste-listings", json={
-                    "generator_id": gen_options[gen_label], "material_type": material,
-                    "quantity_kg": qty, "quality_grade": grade,
-                    "available_from": start.isoformat(), "available_until": end.isoformat(),
-                    "description": description or None, "is_synthetic": False})
-                if result: st.success(f"Listing #{result['id']} created."); st.rerun()
+                    "generator_id": selected_gen_id,
+                    "material_type": material,
+                    "quantity_kg": qty,
+                    "quality_grade": grade,
+                    "available_from": start.isoformat(),
+                    "available_until": end.isoformat(),
+                    "description": description or None,
+                    "is_synthetic": False,
+                })
+                if result:
+                    # Clear the new-generator selection so the dropdown resets
+                    st.session_state.pop("new_generator_label", None)
+                    st.success(f"Listing #{result['id']} created.")
+                    st.rerun()
 
 with tab_match:
     st.subheader("Explainable processor matching")
