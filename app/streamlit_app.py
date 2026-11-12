@@ -109,7 +109,7 @@ with tab_list:
         "Generator",
         gen_choices,
         index=default_gen_index,
-        key="gen_selector",
+        key=f"gen_selector_{len(generators)}",
         help="Select an existing generator or register a new one.",
     )
 
